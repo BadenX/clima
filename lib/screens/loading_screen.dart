@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:geolocator/geolocator.dart';
+import 'package:clima/services/location.dart';
+import 'package:http/http.dart';
 
 class LoadingScreen extends StatefulWidget {
   const LoadingScreen({super.key});
@@ -13,38 +14,25 @@ class _LoadingScreenState extends State<LoadingScreen> {
   void initState() {
     super.initState();
     getLocation();
+    getData();
   }
 
   Future<void> getLocation() async {
-    bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
-    if (!serviceEnabled) {
-      print('Location services are disabled');
-      return;
+    Location location = Location();
+    try {
+      await location.getCurrentLocation();
+    } catch (e) {
+      print("ERROR IN GETLOCATION: $e");
     }
+  }
 
-    LocationPermission permission = await Geolocator.checkPermission();
+  Future<void> getData() async {
+    Uri url = Uri.parse(
+      'https://api.openweathermap.org/data/2.5/weather?lat=35&lon=139&appid={API KEY}',
+    );
 
-    if (permission == LocationPermission.denied) {
-      permission = await Geolocator.requestPermission();
-      if (permission == LocationPermission.denied) {
-        print('Location permission denied');
-        return;
-      }
-    }
-
-    if (permission == LocationPermission.deniedForever) {
-      print('Location permission permanently denied');
-      return;
-    }
-
-    Position? position = await Geolocator.getLastKnownPosition();
-
-    if (position != null) {
-      print('Latitude: ${position.latitude}');
-      print('Longitude: ${position.longitude}');
-    } else {
-      print('No last known location available');
-    }
+    Response response = await get(url);
+    print(response.body);
   }
 
   @override
