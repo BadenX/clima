@@ -9,12 +9,19 @@ class LoadingScreen extends StatefulWidget {
 }
 
 class _LoadingScreenState extends State<LoadingScreen> {
-  final LocationSettings locationSettings = LocationSettings(
-    accuracy: LocationAccuracy.low,
-  );
+  @override
+  void initState() {
+    super.initState();
+    getLocation();
+  }
 
   Future<void> getLocation() async {
-    // Check permission
+    bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
+    if (!serviceEnabled) {
+      print('Location services are disabled');
+      return;
+    }
+
     LocationPermission permission = await Geolocator.checkPermission();
 
     if (permission == LocationPermission.denied) {
@@ -26,17 +33,18 @@ class _LoadingScreenState extends State<LoadingScreen> {
     }
 
     if (permission == LocationPermission.deniedForever) {
-      print('Location permission permanently denied, open settings');
-      await Geolocator.openAppSettings();
-      await Geolocator.openLocationSettings();
+      print('Location permission permanently denied');
       return;
     }
 
-    // If permission granted, ask for the position
-    Position position = await Geolocator.getCurrentPosition(
-      locationSettings: locationSettings,
-    );
-    print(position);
+    Position? position = await Geolocator.getLastKnownPosition();
+
+    if (position != null) {
+      print('Latitude: ${position.latitude}');
+      print('Longitude: ${position.longitude}');
+    } else {
+      print('No last known location available');
+    }
   }
 
   @override
@@ -44,10 +52,8 @@ class _LoadingScreenState extends State<LoadingScreen> {
     return Scaffold(
       body: Center(
         child: ElevatedButton(
-          onPressed: () {
-            getLocation();
-          },
-          child: Text('Get Location'),
+          onPressed: getLocation,
+          child: const Text('Get Location'),
         ),
       ),
     );
