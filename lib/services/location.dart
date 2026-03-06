@@ -6,6 +6,7 @@ class Location {
 
   Future<void> getCurrentLocation() async {
     bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
+
     if (!serviceEnabled) {
       print('Location services are disabled');
       return;
@@ -26,25 +27,30 @@ class Location {
       return;
     }
 
-    print('GET CURRENT POSITION START');
-
-    const locationSettings = LocationSettings(
-      accuracy: LocationAccuracy.high,
-      timeLimit: Duration(seconds: 10),
-    );
-
     try {
+      LocationSettings locationSettings = const LocationSettings(
+        accuracy: LocationAccuracy.low,
+        timeLimit: Duration(seconds: 8),
+      );
+
       Position position = await Geolocator.getCurrentPosition(
         locationSettings: locationSettings,
       );
 
       latitude = position.latitude;
       longitude = position.longitude;
-
-      print('CURRENT Latitude: $latitude');
-      print('CURRENT Longitude: $longitude');
     } catch (e) {
-      print('CURRENT POSITION ERROR: $e');
+      print('Current position failed: $e');
+      Position? lastPosition = await Geolocator.getLastKnownPosition();
+
+      if (lastPosition != null) {
+        latitude = lastPosition.latitude;
+        longitude = lastPosition.longitude;
+        print('LAST KNOWN Latitude: $latitude');
+        print('LAST KNOWN Longitude: $longitude');
+      } else {
+        print('No last known location available');
+      }
     }
   }
 }
