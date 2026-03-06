@@ -26,15 +26,25 @@ class Location {
       return;
     }
 
-    Position? position = await Geolocator.getLastKnownPosition();
+    print('GET CURRENT POSITION START');
 
-    if (position != null) {
+    const locationSettings = LocationSettings(
+      accuracy: LocationAccuracy.high,
+      timeLimit: Duration(seconds: 10),
+    );
+
+    try {
+      Position position = await Geolocator.getCurrentPosition(
+        locationSettings: locationSettings,
+      );
+
       latitude = position.latitude;
       longitude = position.longitude;
-      print('Latitude: $latitude');
-      print('Longitude: $longitude');
-    } else {
-      print('No last known location available');
+
+      print('CURRENT Latitude: $latitude');
+      print('CURRENT Longitude: $longitude');
+    } catch (e) {
+      print('CURRENT POSITION ERROR: $e');
     }
   }
 }
