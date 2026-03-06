@@ -46,8 +46,6 @@ class Location {
       if (lastPosition != null) {
         latitude = lastPosition.latitude;
         longitude = lastPosition.longitude;
-        print('LAST KNOWN Latitude: $latitude');
-        print('LAST KNOWN Longitude: $longitude');
       } else {
         print('No last known location available');
       }
